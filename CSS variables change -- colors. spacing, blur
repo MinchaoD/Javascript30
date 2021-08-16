@@ -1,0 +1,76 @@
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scoped CSS Variables and JS</title>
+</head>
+<body>
+  <h2>Update CSS Variables with <span class='hl'>JS</span></h2>
+
+  <div class="controls">
+    <label for="spacing">Spacing:</label>
+    <input id="spacing" type="range" name="spacing" min="10" max="200" value="10" data-sizing="px">
+
+    <label for="blur">Blur:</label>
+    <input id="blur" type="range" name="blur" min="0" max="25" value="10" data-sizing="px">
+
+    <label for="color">Base Color</label>
+    <input id="color" type="color" name="color" value="#ffc600">
+  </div>
+
+  <img src="https://source.unsplash.com/7bwQXzbF6KE/800x500">
+
+  <style>
+  
+    :root{
+      --color: #ffc600;
+      --spacing: 10px;
+      --blur: 10px;
+    }
+<!--      this is to grab color spacing and blur variables in css, use -- is default -->
+    
+    img{
+      padding: var(--spacing);
+      background: var(--color);
+      filter: blur(var(--blur));
+     
+    }
+    
+   
+    .hl {
+      color: var(--color);
+     }
+    
+    
+   body {
+      text-align: center;
+      background: #193549;
+      color: white;
+      font-family: 'helvetica neue', sans-serif;
+      font-weight: 100;
+      font-size: 50px;
+    }
+
+    .controls {
+      margin-bottom: 50px;
+    }
+
+    input {
+      width: 100px;
+    }
+  </style>
+
+  <script>
+    const inputs = document.querySelectorAll('.controls input') // this is to grab spacing, color and blur
+    function handleUpdate(){
+      const suffix = this.dataset.sizing || "";
+      // this is to get data-sizing because after 10 it has px, it is 10px, so we need to add suffix px by using data-sizing.  this.dataset is to get all the data-attributes
+      document.documentElement.style.setProperty(`--${this.name}`, this.value + suffix)
+      // this.name will be spacing, color and blur, and this.value is the real value from spacing, blur and color
+    }
+    inputs.forEach(input => input.addEventListener('change', handleUpdate)) 
+    // forEach here is because there are 3 variables (spacing, color, blur) in the inputs
+  </script>
+
+</body>
+</html>
