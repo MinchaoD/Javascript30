@@ -1,0 +1,71 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Mouse Shadow</title>
+</head>
+<body>
+
+  <div class="hero">
+    <h1 contenteditable>🔥WOAH!</h1>
+  </div>
+
+  <style>
+  html {
+    color: black;
+    font-family: sans-serif;
+  }
+
+  body {
+    margin: 0;
+  }
+
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+  }
+
+  h1 {
+    text-shadow: 10px 10px 0 rgba(0,0,0,1);
+    font-size: 100px;
+  }
+  </style>
+
+<script>
+  const hero = document.querySelector('.hero')
+  const text = document.querySelector('h1')
+  function shadow(e){
+    const width = hero.offsetWidth;
+    const height = hero.offsetHeight;
+    // the above 2 lines can also be like:  const{offsetWidth: width, offsetHeight: height} = hero
+    let x = e.offsetX;
+    let y = e.offsetY;
+    // the x and y here is when cursor moves, it is the x and y accordingly for the current location
+    if(this !== e.target) {
+      x = x + e.target.offsetLeft;
+      y = y + e.target.offsetTop
+    } 
+    // the above code is because when cursor is near the h1 box, the x and y become 0, we need to have them to be the same value as outside the h1 box. 
+    // this is hero,  e.target is whereever the cursor at (can be at h1 or hero), so when this is not same as e.target which means e.target is at h1, then we need to add x with e.target.offsetLeft.
+    
+    const walk = 100;
+    // we can have walk to be 500, then when the cursor moves, the range/walk of the shadow moves a lot bigger
+    const walkX = Math.round((x/width*walk) - walk/2);
+    const walkY = Math.round((y/height*walk) - walk/2);
+    // if walk is 100, we want our range from left corner to right corner is -50 to 50, so we use x/width*walk to calculate the percetage of where the cursor at, then -walk/2 which is 50, so we control the range is between -50 to 50
+    
+
+    text.style.textShadow = ` ${walkX}px ${walkY}px 0 rgba(255,0,255,0.7),
+                            ${walkX * -1}px ${walkY}px 0 rgba(0,255,255,0.7),
+                            ${walkY}px ${walkX * -1}px 0 rgba(0,255,0,0.7),
+                            ${walkY * -1}px ${walkX}px 0 rgba(0,0,255,0.7)`
+    //.style.textShadow is built in code, 0 is the blurry, or it can also be like with one color:
+    //     text.style.textShadow = `${walkX}px ${walkY}px 0 red`
+  }
+  
+  hero.addEventListener('mousemove', shadow)
+</script>
+</body>
+</html>
