@@ -1,0 +1,227 @@
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Get User Media Code Along!</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="photobooth">
+    <div class="controls">
+      <button onClick="takePhoto()">Take Photo</button>
+      <div class="rgb">
+        <label for="rmin">Red Min:</label>
+        <input type="range" min=0 max=255 name="rmin">
+        <label for="rmax">Red Max:</label>
+        <input type="range" min=0 max=255 name="rmax">
+        <br>
+        <label for="gmin">Green Min:</label>
+        <input type="range" min=0 max=255 name="gmin">
+        <label for="gmax">Green Max:</label>
+        <input type="range" min=0 max=255 name="gmax">
+        <br>
+        <label for="bmin">Blue Min:</label>
+        <input type="range" min=0 max=255 name="bmin">
+        <label for="bmax">Blue Max:</label>
+        <input type="range" min=0 max=255 name="bmax">
+      </div>
+    </div>
+
+    <canvas class="photo"></canvas>
+    <video class="player"></video>
+    <div class="strip"></div>
+  </div>
+
+  <audio class="snap" src="/Webcam.mp3" hidden></audio>
+
+  <script src="scripts.js"></script>
+
+</body>
+
+<style>
+html {
+    box-sizing: border-box;
+  }
+  
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+  
+  html {
+    font-size: 10px;
+    background: #ffc600;
+  }
+  
+  .photobooth {
+    background: white;
+    max-width: 150rem;
+    margin: 2rem auto;
+    border-radius: 2px;
+  }
+  
+  /*clearfix*/
+  .photobooth:after {
+    content: '';
+    display: block;
+    clear: both;
+  }
+  
+  .photo {
+    width: 100%;
+    float: left;
+  }
+  
+  .player {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width:200px;
+  }
+  
+  /*
+    Strip!
+  */
+  
+  .strip {
+    padding: 2rem;
+  }
+  
+  .strip img {
+    width: 100px;
+    overflow-x: scroll;
+    padding: 0.8rem 0.8rem 2.5rem 0.8rem;
+    box-shadow: 0 0 3px rgba(0,0,0,0.2);
+    background: white;
+  }
+  
+  .strip a:nth-child(5n+1) img { transform: rotate(10deg); }
+  .strip a:nth-child(5n+2) img { transform: rotate(-2deg); }
+  .strip a:nth-child(5n+3) img { transform: rotate(8deg); }
+  .strip a:nth-child(5n+4) img { transform: rotate(-11deg); }
+  .strip a:nth-child(5n+5) img { transform: rotate(12deg); }
+</style>
+
+<script>
+const video = document.querySelector('.player');
+const canvas = document.querySelector('.photo');
+const ctx = canvas.getContext('2d');
+const strip = document.querySelector('.strip');
+const snap = document.querySelector('.snap');
+
+function getVideo() {
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false})
+        .then(localMediaStream => {
+            video.srcObject = localMediaStream;
+            // the above lines are for to get the live video from camera
+            video.play();
+        });
+}
+
+getVideo()
+
+function addToCanvas(){
+    const width = video.videoWidth;
+    const height = video.videoHeight;
+    canvas.width = width;
+    canvas.height = height;
+    // this is to set canvas size to be same as the video size
+
+   return setInterval(() => {
+        ctx.drawImage(video, 0, 0, width, height);
+         // 0, 0 is starting from left top corner
+
+        let pixels = ctx.getImageData(0, 0, width, height);
+        // this is to take the pixels out of the image data
+
+        // pixels = rgbSplit(pixels);
+        // play with the rgbSplit effect
+
+        pixels = sliderEffect(pixels);
+
+        // pixels = redEffect(pixels);
+        // this code can replace the regSplit(pixels), this is to play with the pixel with redEffect
+
+        ctx.putImageData(pixels, 0, 0);
+        // put the played pixels back to the image to show the red effect
+    }, 16)
+       // 16 is the every 16 milliseconds, it will add the video to canvas
+}
+
+video.addEventListener('canplay', addToCanvas);
+// this is to run addToCanvas function
+
+function takePhoto() {
+    snap.currentTime = 0;
+    snap.play()
+    // the snap.play() will make the audio sound which is defined in html too
+
+    const data = canvas.toDataURL('image/jpeg');
+    // this is to get the data info for the image taken
+    const link = document.createElement('a');
+    // create a href link
+    link.href = data;
+    link.setAttribute('download', 'photo1');
+    // this can allow the image to be downloaded and named as photo1
+    link.innerHTML = `<img src='${data}' alt = 'photo' />`
+    // this is to show the image at link/strip location
+
+    // link.textContent = 'Download Image';
+    // the above code is to replace the link.innerHTML code, this is just to show the text "Download Image" instead of actual photo, and you can then download it to see it
+
+    strip.insertBefore(link, strip.firstChild);
+    // this is to insert the photo at strip area which was defined in html
+}
+// in html file the button Take Photo has the onclick='takePhoto()' to run this function
+
+
+function redEffect(pixels) {
+    for(let i = 0; i < pixels.data.length; i+=4) {
+        // i+=4 is because it goes red, green, blue and alpha, so run every 4 times
+        pixels.data[i] = pixels.data[i] + 100;  // this for red color
+        pixels.data[i + 1 ] = pixels.data[i + 1] - 100;  // this for green color
+        pixels.data[i + 2] = pixels.data[i + 2] * 0.5;  // this for blue color, and we don't change alpha here
+    }
+    return pixels
+}
+
+function rgbSplit(pixels) {
+    for(let i = 0; i < pixels.data.length; i+=4) {
+
+        pixels.data[i - 150] = pixels.data[i]   // this for red color in position -150 to be the current red color
+        pixels.data[i + 100 ] = pixels.data[i + 1]  // this for green color in position + 100 to be the current green color
+        pixels.data[i - 500] = pixels.data[i + 2] // this for blue color in position -500 to be the current blue color
+    }
+        return pixels
+}
+
+function sliderEffect(pixels) {
+    const levels = {};
+
+    document.querySelectorAll('.rgb input').forEach((item) => {
+        levels[item.name] = item.value;
+
+    });
+
+    for (i=0; i<pixels.data.length; i+=4) {
+        red = pixels.data[i];
+        green = pixels.data[i+1];
+        blue = pixels.data[i+2];
+        alpha = pixels.data[i+3];
+
+        if (red >= levels.rmin
+            && green >= levels.gmin
+            && blue >= levels.bmin
+            && red <= levels.rmax
+            && green <= levels.gmax
+            && blue <= levels.bmax) {
+                pixels.data[i + 3] = 0;
+                // this means when all the red, blue and green in the slider range, then make the [i+3] which is alpha to be 0, which is transparent
+            }
+    }
+    return pixels
+}
+</script>
+
+
+</html>
