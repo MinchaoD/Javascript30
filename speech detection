@@ -1,0 +1,44 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Speech Detection</title>
+</head>
+<body>
+
+  <div class="words" contenteditable>
+  </div>
+
+<script>
+  window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+// this is the built in window speeck recognition, 2 ways, either way will work
+
+const recognition = new SpeechRecognition();
+recognition.interimResults = true;
+recognition.lang = 'en-US';
+
+let p = document.createElement('p');
+const words = document.querySelector('.words');
+words.appendChild(p);
+
+recognition.addEventListener('result', e => {
+    const transcript = Array.from(e.results)
+    .map(result => result[0])
+    .map(result => result.transcript)
+    .join('');
+    // those are to get the actual talking word from the e.results, map through result[0] and through result.transcript
+
+    p.textContent = transcript;
+
+    if (e.results[0].isFinal) {
+        p = document.createElement('p');
+        words.appendChild(p)
+    }
+    // this is for when there is a break when talking, it will create a new paragraph to add new content
+    // if no the above if code, then after a little break, the new content will replace the old ones
+
+});
+
+recognition.addEventListener('end', recognition.start);
+// the above code is for when there is a little break when talking, after the break, the new words will be added too
+// if no this code, after a break, the recognition will stop
+
