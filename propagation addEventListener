@@ -1,0 +1,69 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Understanding JavaScript's Capture</title>
+</head>
+<body class="bod">
+
+  <div class="one">
+    <div class="two">
+      <div class="three">
+      </div>
+    </div>
+  </div>
+
+<style>
+  html {
+    box-sizing: border-box;
+  }
+  
+  *, *:before, *:after { 
+    box-sizing: inherit; 
+  }
+
+  div {
+    width: 100%;
+    padding: 100px;
+  }
+
+  .one {
+    background: thistle;
+  }
+
+  .two {
+    background: mistyrose;
+  }
+
+  .three {
+    background: coral;
+  }
+</style>
+
+<button></button>
+<script>
+  const divs = document.querySelectorAll('div');
+  const button = document.querySelector('button');
+
+  function logText(e) {
+    console.log(this.classList.value);
+    e.stopPropagation(); 
+    // e.stopPropagation() means only select 1 div, so if I click on coral, and capture is false, then it will console.log three, otherwise, if no e.stopPropagation, it will console.log three two one, which is all of them
+    // console.log(this);
+  }
+
+  divs.forEach(div => div.addEventListener('click', logText, {
+    capture: false,
+    //if capture: true means from top div down to the below div, so if I click on coral, it will console.log one instead of three. If capture is false, then if I click on coral, it console.log three. Note: because the above has e.stopPropagation(), so only log out 1 div here, otherwise, will console.log three two one
+    once: true
+  }));
+
+  button.addEventListener('click', () => {
+    console.log('Click!!!');
+  }, {
+    once: true
+    // here once: true means only click once will console.log, after that, won't do anything, it is unbinded
+  });
+
+</script>
+</body>
+</html>
